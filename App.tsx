@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 // ─── CONFIGURAÇÃO ────────────────────────────────────────────────
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYDS9klKcnRkbBR_GhQwIkAQt-WLizjA5AcaiDNSzvqlCKQ0mT0MH6r35TzWCMQ8c/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYDS9klKcnRkbBR_GhQwIkAQt-WLizjA5AcaiDNSzvqlCKQ0mT0MH6r35TzWCMQ8c/exec"; // Insira a URL do Google Apps Script aqui
 const APP_VERSION = "1.0.0";
 // Grafia oficial: Jiu Jitsu (sem hífen)
 
@@ -145,10 +145,39 @@ const COMPORTAMENTOS = [
 ];
 
 const PRIORIDADES = [
-  "Melhorar retenção","Captar novos alunos","Organizar melhor a aula",
-  "Melhorar comunicação com os pais","Separar melhor as faixas etárias",
-  "Aumentar valor percebido","Fortalecer reforço positivo",
-  "Melhorar adaptação das crianças","Criar nova turma Baby Class",
+  "Melhorar retenção","Melhorar entrada e adaptação das crianças","Organizar melhor a aula",
+  "Melhorar comunicação com os pais","Separar melhor as faixas etárias","Criar rotina de feedback",
+  "Aumentar engajamento da turma","Fortalecer as 3 regras do tatame","Melhorar valor percebido",
+  "Captar novos alunos","Registrar evolução comportamental","Criar desafio com os responsáveis",
+];
+
+const AJUSTES_PRATICOS = [
+  "Reduzir explicações longas","Organizar a aula em microblocos","Repetir as 3 regras do tatame no início da aula",
+  "Enviar feedback pós-aula para os pais","Criar um desafio no grupo dos responsáveis","Ajustar a divisão por idade",
+  "Usar reforço positivo com mais intenção","Registrar um caso de evolução","Comunicar melhor o objetivo da aula",
+  "Fazer um post de posicionamento no Instagram","Aplicar uma atividade do Método LEAD com objetivo claro","Fazer um MatChat no final da aula",
+];
+
+const SUGESTOES_ACAO = {
+  "Reduzir explicações longas": "Na próxima aula, explicar cada atividade em até 1 minuto, usando demonstração visual e comando simples.",
+  "Organizar a aula em microblocos": "Dividir a próxima aula em blocos curtos: entrada, aquecimento lúdico, técnica traduzida, desafio e fechamento.",
+  "Repetir as 3 regras do tatame no início da aula": "Iniciar as próximas aulas perguntando às crianças quais são as 3 regras do tatame e reforçar cada uma com gesto e repetição.",
+  "Enviar feedback pós-aula para os pais": "Após a próxima aula, enviar uma mensagem curta explicando qual habilidade motora, emocional ou comportamental foi trabalhada.",
+  "Criar um desafio no grupo dos responsáveis": "Escolher um comportamento simples para reforçar em casa e convidar os responsáveis a enviarem um relato ou vídeo curto.",
+  "Ajustar a divisão por idade": "Observar a turma atual e identificar se há crianças em fases muito diferentes prejudicando segurança, foco ou engajamento.",
+  "Usar reforço positivo com mais intenção": "Durante a próxima aula, elogiar comportamentos específicos, como esperar a vez, obedecer comandos e respeitar os amigos.",
+  "Registrar um caso de evolução": "Escolher uma criança ou turma e registrar o desafio inicial, a ação aplicada e a evolução percebida, sem usar nome completo.",
+  "Comunicar melhor o objetivo da aula": "Antes ou depois da aula, explicar aos pais em uma frase qual desenvolvimento foi trabalhado através da atividade.",
+  "Fazer um post de posicionamento no Instagram": "Publicar um conteúdo explicando que Jiu Jitsu infantil não é apenas gasto de energia, mas desenvolvimento motor, emocional e social.",
+  "Aplicar uma atividade do Método LEAD com objetivo claro": "Escolher uma atividade do método e definir previamente qual habilidade ela desenvolve: motor, afetivo, cognitivo, social ou emocional.",
+  "Fazer um MatChat no final da aula": "Finalizar a próxima aula com uma conversa curta conectando a atividade do tatame com uma atitude para a vida.",
+};
+
+const COMO_SABER_OPCOES = [
+  "As crianças participaram melhor","Houve menos choro ou resistência","Os pais responderam melhor",
+  "A turma ficou mais organizada","As regras foram lembradas com mais facilidade","Houve mais engajamento",
+  "A comunicação com os pais ficou mais clara","Um caso de evolução foi percebido","A retenção melhorou",
+  "A captação teve resposta","Outro",
 ];
 
 const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
@@ -332,7 +361,7 @@ export default function App() {
     participacaoPais:null,satisfacaoTurma:null,organizacaoAula:null,reforcoPosi:null,posicionamento:null,
     comportamentos:[],
     criancaDestaque:"",evolucaoObservada:"",evolucaoComunicada:"",
-    prioridade:"",oQueAjustar:"",porQueAjuste:"",primeiraAcao:"",dataAplicacao:"",comoMedir:"",observacoes:"",
+    prioridade:"",ajusteEscolhido:"",primeiraAcao:"",dataAplicacao:"",comoVouSaber:"",comoVouSaberOutro:"",
   });
 
   const upd = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -345,7 +374,7 @@ export default function App() {
 
   const progGeral = getProgressoGeral(history, jornada);
 
-  const STEPS = ["Diagnóstico","Indicadores","Qualitativos","Comportamental","Plano de Ação","Relatório","Histórico","Meu Perfil LEAD","Equipe LEAD"];
+  const STEPS = ["Diagnóstico","Indicadores","Qualitativos","Comportamental","Próximo Ajuste LEAD","Relatório","Histórico","Meu Perfil LEAD","Equipe LEAD"];
 
   const saveMonth = () => {
     const entry = { ...form, taxaRetencao: taxa, zone, savedAt: new Date().toISOString() };
@@ -376,34 +405,20 @@ export default function App() {
 
   const sendToLEAD = async () => {
     if (!GOOGLE_SCRIPT_URL) { setSendStatus("no_url"); setShowConfirm(false); return; }
-    const entry = { ...form, taxaRetencao: taxa, zone, dataEnvio: new Date().toISOString(), faixaAtual: progGeral.faixaAtual?.nome || "Sem faixa", mesesConsecutivos: progGeral.mesesCons };
-    const sendToLEAD = async () => {
-  if (!GOOGLE_SCRIPT_URL) { setSendStatus("no_url"); setShowConfirm(false); return; }
-
-  const entry = {
-    ...form,
-    taxaRetencao: taxa,
-    zone,
-    dataEnvio: new Date().toISOString(),
-    faixaAtual: progGeral.faixaAtual?.nome || "Sem faixa",
-    mesesConsecutivos: progGeral.mesesCons
+    const entry = { ...form, taxaRetencao: taxa, zone, dataEnvio: new Date().toISOString(), faixaAtual: progGeral.faixaAtual?.nome || "Sem faixa", mesesConsecutivos: progGeral.mesesCons, prioridade: form.prioridade, ajusteEscolhido: form.ajusteEscolhido, primeiraAcao: form.primeiraAcao, dataAplicacao: form.dataAplicacao, comoVouSaber: form.comoVouSaber === "Outro" ? form.comoVouSaberOutro : form.comoVouSaber };
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(entry),
+      });
+      setSendStatus("success");
+    }
+    catch {
+      setSendStatus("error");
+    }
+    setShowConfirm(false);
   };
-
-  try {
-    await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify(entry),
-    });
-
-    setSendStatus("success");
-  }
-  catch {
-    setSendStatus("error");
-  }
-
-  setShowConfirm(false);
-};
 
   const proximo = progGeral.proximaFaixa;
   const proxPend = proximo ? (() => {
@@ -413,7 +428,7 @@ export default function App() {
     return pendente ? pendente.label : null;
   })() : null;
 
-  const whatsapp = `*Relatório Mensal LEAD — ${form.mes} ${form.ano}*\n\nTurma: ${form.turma}\nAlunos ativos: ${form.alunosFinal}\nTaxa de retenção: ${taxa !== null ? taxa + "%" : "—"}\nZona LEAD: ${zone.charAt(0).toUpperCase()+zone.slice(1)}\n\nFaixa atual: ${progGeral.faixaAtual?.nome || "Em andamento"}\nPróxima faixa: ${proximo?.nome || "Jornada completa"}\nPróximo passo da jornada:\n${proxPend || "Continuar preenchendo o Painel de Bordo"}\n\nPrioridade do próximo mês:\n${form.prioridade}\n\nPrimeira ação prática:\n${form.primeiraAcao}\n\nSeguimos acompanhando, ajustando e construindo um Baby Class com mais método, valor percebido e desenvolvimento real.`;
+  const whatsapp = `*Relatório Mensal LEAD — ${form.mes} ${form.ano}*\n\nTurma: ${form.turma}\nAlunos ativos: ${form.alunosFinal}\nTaxa de retenção: ${taxa !== null ? taxa + "%" : "—"}\nZona LEAD: ${zone.charAt(0).toUpperCase()+zone.slice(1)}\n\nFaixa atual: ${progGeral.faixaAtual?.nome || "Em andamento"}\nPróxima faixa: ${proximo?.nome || "Jornada completa"}\nPróximo passo da jornada:\n${proxPend || "Continuar preenchendo o Painel de Bordo"}\n\nPrioridade do mês:\n${form.prioridade}\n\nAjuste escolhido:\n${form.ajusteEscolhido}\n\nPrimeira ação prática:\n${form.primeiraAcao}\n\nQuando: ${form.dataAplicacao ? new Date(form.dataAplicacao+"T00:00:00").toLocaleDateString("pt-BR") : "—"}\nComo vou saber se funcionou: ${form.comoVouSaber === "Outro" ? form.comoVouSaberOutro : form.comoVouSaber}\n\nSeguimos acompanhando, ajustando e construindo um Baby Class com mais método, valor percebido e desenvolvimento real.`;
 
   const copyWA = () => { navigator.clipboard.writeText(whatsapp).then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),2000); }); };
 
@@ -600,11 +615,22 @@ function StepComp({ form, upd, toggle }) {
 }
 
 function StepPlano({ form, upd }) {
+  const handleAjuste = (ajuste) => {
+    if (form.ajusteEscolhido === ajuste) {
+      upd("ajusteEscolhido", "");
+      upd("primeiraAcao", "");
+    } else {
+      upd("ajusteEscolhido", ajuste);
+      upd("primeiraAcao", SUGESTOES_ACAO[ajuste] || "");
+    }
+  };
+
   return <div>
-    <div style={s.quote}>"Crescimento sem acompanhamento vira sorte. Crescimento com método vira construção."</div>
+    <div style={s.quote}>"No início, o professor não precisa criar o plano do zero. Ele precisa escolher uma direção e aplicar o primeiro ajuste."</div>
+
     <div style={{ marginBottom:32 }}>
-      <div style={s.secTitle}>Prioridade do próximo mês</div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:24 }}>
+      <div style={s.secTitle}>1. Prioridade do mês</div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
         {PRIORIDADES.map((p,i)=>(
           <div key={i} style={{ ...s.optCard(form.prioridade===p), padding:"10px 14px" }} onClick={()=>upd("prioridade",form.prioridade===p?"":p)}>
             <div style={{ fontSize:13, fontFamily:"sans-serif", color:form.prioridade===p?GOLD:CHARCOAL }}>{p}</div>
@@ -612,14 +638,47 @@ function StepPlano({ form, upd }) {
         ))}
       </div>
     </div>
+
     <div style={{ marginBottom:32 }}>
-      <div style={s.secTitle}>Plano de ação</div>
-      <Field label="O que vamos ajustar?"><textarea style={s.ta} value={form.oQueAjustar} onChange={e=>upd("oQueAjustar",e.target.value)} placeholder="Descreva o ajuste principal..."/></Field>
-      <Field label="Por que esse ajuste é importante?"><textarea style={s.ta} value={form.porQueAjuste} onChange={e=>upd("porQueAjuste",e.target.value)} placeholder="Qual é o impacto esperado?"/></Field>
-      <Field label="Qual será a primeira ação prática?"><textarea style={s.ta} value={form.primeiraAcao} onChange={e=>upd("primeiraAcao",e.target.value)} placeholder="Seja específico..."/></Field>
-      <Field label="Quando será aplicada?"><input style={s.inp} type="date" value={form.dataAplicacao} onChange={e=>upd("dataAplicacao",e.target.value)}/></Field>
-      <Field label="Como vamos medir se funcionou?"><textarea style={s.ta} value={form.comoMedir} onChange={e=>upd("comoMedir",e.target.value)} placeholder="Qual será o indicador de sucesso?"/></Field>
-      <Field label="Observações (opcional)"><textarea style={s.ta} value={form.observacoes} onChange={e=>upd("observacoes",e.target.value)} placeholder="Qualquer outra observação sobre este mês..."/></Field>
+      <div style={s.secTitle}>2. Ajuste que será aplicado</div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+        {AJUSTES_PRATICOS.map((a,i)=>(
+          <div key={i} style={{ ...s.optCard(form.ajusteEscolhido===a), padding:"10px 14px" }} onClick={()=>handleAjuste(a)}>
+            <div style={{ fontSize:13, fontFamily:"sans-serif", color:form.ajusteEscolhido===a?GOLD:CHARCOAL }}>{a}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {form.ajusteEscolhido && (
+      <div style={{ marginBottom:32 }}>
+        <div style={s.secTitle}>3. Minha primeira ação prática será</div>
+        <div style={s.priv}>Sugestão automática com base no ajuste escolhido. Edite livremente se quiser personalizar.</div>
+        <div style={{ marginTop:16 }}>
+          <textarea style={s.ta} value={form.primeiraAcao} onChange={e=>upd("primeiraAcao", e.target.value)} placeholder="Edite a sugestão ou escreva sua própria ação..." />
+        </div>
+      </div>
+    )}
+
+    <div style={{ marginBottom:32 }}>
+      <div style={s.secTitle}>4. Quando vou aplicar?</div>
+      <Field label="Data de aplicação"><input style={s.inp} type="date" value={form.dataAplicacao} onChange={e=>upd("dataAplicacao",e.target.value)}/></Field>
+    </div>
+
+    <div style={{ marginBottom:32 }}>
+      <div style={s.secTitle}>5. Como vou saber se funcionou?</div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+        {COMO_SABER_OPCOES.map((o,i)=>(
+          <div key={i} style={{ ...s.optCard(form.comoVouSaber===o), padding:"10px 14px" }} onClick={()=>upd("comoVouSaber",form.comoVouSaber===o?"":o)}>
+            <div style={{ fontSize:13, fontFamily:"sans-serif", color:form.comoVouSaber===o?GOLD:CHARCOAL }}>{o}</div>
+          </div>
+        ))}
+      </div>
+      {form.comoVouSaber === "Outro" && (
+        <div style={{ marginTop:12 }}>
+          <input style={s.inp} value={form.comoVouSaberOutro} onChange={e=>upd("comoVouSaberOutro", e.target.value)} placeholder="Descreva brevemente..." />
+        </div>
+      )}
     </div>
   </div>;
 }
@@ -642,7 +701,7 @@ function ReportView({ data, progGeral }) {
     <div style={{ textAlign:"center", marginBottom:20 }}><div style={s.zone(z)}>{z==="atenção"?"Zona de Atenção":z==="ajuste"?"Zona de Ajuste":"Zona de Crescimento"}</div></div>
     {data.comportamentos?.length>0&&<div style={s.card}><div style={s.secTitle}>Evoluções comportamentais</div>{data.comportamentos.map((c,i)=><div key={i} style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, padding:"5px 0", borderBottom:`0.5px solid ${BORDER}` }}>✓ {c}</div>)}</div>}
     {progGeral?.faixaAtual&&<div style={s.card}><div style={s.secTitle}>Jornada LEAD do Professor</div><div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:12 }}><FaixaIcon faixa={progGeral.faixaAtual} size={80}/><div><div style={{ fontSize:14, fontFamily:"sans-serif", color:CHARCOAL, fontWeight:500 }}>{progGeral.faixaAtual.nome}</div><div style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginTop:4 }}>{progGeral.faixaAtual.subtitulo}</div></div></div></div>}
-    <div style={s.card}><div style={s.secTitle}>Prioridade do próximo mês</div><div style={{ fontSize:14, fontFamily:"sans-serif", color:GOLD, fontWeight:500, marginBottom:8 }}>{data.prioridade||"—"}</div>{data.oQueAjustar&&<p style={{ fontSize:13, fontFamily:"sans-serif", color:MUTED, lineHeight:1.7 }}>{data.oQueAjustar}</p>}</div>
+    <div style={s.card}><div style={s.secTitle}>Próximo Ajuste LEAD</div><div style={{ fontSize:14, fontFamily:"sans-serif", color:GOLD, fontWeight:500, marginBottom:8 }}>{data.prioridade||"—"}</div>{data.ajusteEscolhido&&<p style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.7, marginBottom:8 }}><strong>Ajuste:</strong> {data.ajusteEscolhido}</p>}{data.primeiraAcao&&<p style={{ fontSize:13, fontFamily:"sans-serif", color:MUTED, lineHeight:1.7, marginBottom:8 }}><strong style={{ color:CHARCOAL }}>Primeira ação:</strong> {data.primeiraAcao}</p>}{data.dataAplicacao&&<p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginBottom:8 }}><strong style={{ color:CHARCOAL }}>Quando:</strong> {new Date(data.dataAplicacao+"T00:00:00").toLocaleDateString("pt-BR")}</p>}{(data.comoVouSaber)&&<p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED }}><strong style={{ color:CHARCOAL }}>Como vou saber se funcionou:</strong> {data.comoVouSaber==="Outro"?data.comoVouSaberOutro:data.comoVouSaber}</p>}</div>
     <div style={s.cardG}><div style={{ fontSize:11, fontFamily:"sans-serif", color:GOLD, letterSpacing:2, textTransform:"uppercase", marginBottom:10 }}>Mensagem estratégica · Equipe LEAD</div><p style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.8, fontStyle:"italic", margin:0 }}>{STRATEGIC_MSGS[z]}</p></div>
   </div>;
 }
@@ -950,7 +1009,7 @@ function AchievModal({ faixa, onClose }) {
         <div style={{ fontSize:13, fontFamily:"sans-serif", color:GOLD, marginBottom:24, fontStyle:"italic" }}>{faixa.subtitulo}</div>
         <p style={{ fontSize:14, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.8, whiteSpace:"pre-line", marginBottom:20 }}>{faixa.mensagemDesbloqueio}</p>
         <div style={{ height:1, background:`linear-gradient(90deg, transparent, ${GOLD}, transparent)`, opacity:0.4, margin:"20px 0" }} />
-        <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, lineHeight:1.7, marginBottom:28, fontStyle:"italic" }}>Essa conquista representa sua decisão de começar, sua intenção pedagógica e seu compromisso com uma experiência infantil mais organizada, segura e valiosa.</p>
+        <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, lineHeight:1.7, marginBottom:28, fontStyle:"italic" }}>{faixa.id === "branca" ? "Essa conquista representa a sua decisão de começar com método, sua intenção pedagógica e seu compromisso com uma experiência infantil mais organizada, segura e valiosa." : "Essa conquista representa sua consistência, sua intenção pedagógica e seu compromisso com uma experiência infantil mais organizada, segura e valiosa."}</p>
         <button style={{ ...s.btnG, boxShadow:"0 8px 20px rgba(184,150,62,0.4)", padding:"16px 40px" }} onClick={onClose}>Continuar minha jornada</button>
       </div>
     </div>

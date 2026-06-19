@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 // ─── CONFIGURAÇÃO ────────────────────────────────────────────────
-const GOOGLE_SCRIPT_URL = ""; // Insira a URL do Google Apps Script aqui
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYDS9klKcnRkbBR_GhQwIkAQt-WLizjA5AcaiDNSzvqlCKQ0mT0MH6r35TzWCMQ8c/exec";
 const APP_VERSION = "1.0.0";
 // Grafia oficial: Jiu Jitsu (sem hífen)
 

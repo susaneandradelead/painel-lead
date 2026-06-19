@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="28" fill="#FAFAF8"/>
+  <path d="M64 22 99 88H29L64 22Z" fill="none" stroke="#B8963E" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="64" cy="66" r="7" fill="#B8963E"/>
+  <text x="64" y="108" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" letter-spacing="5" fill="#2C2C2C">LEAD</text>
+</svg>

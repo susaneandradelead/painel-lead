@@ -1,0 +1,16 @@
+{
+  "name": "Painel de Bordo LEAD",
+  "short_name": "LEAD Dashboard",
+  "description": "Painel de Bordo do Professor LEAD",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAF8",
+  "theme_color": "#B8963E",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

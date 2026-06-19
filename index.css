@@ -1,0 +1,19 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  min-height: 100%;
+  background: #FAFAF8;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+@media print {
+  button {
+    display: none !important;
+  }
+}

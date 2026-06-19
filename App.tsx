@@ -927,7 +927,7 @@ function AchievModal({ faixa, onClose }) {
         <div style={{ fontSize:13, fontFamily:"sans-serif", color:GOLD, marginBottom:24, fontStyle:"italic" }}>{faixa.subtitulo}</div>
         <p style={{ fontSize:14, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.8, whiteSpace:"pre-line", marginBottom:20 }}>{faixa.mensagemDesbloqueio}</p>
         <div style={{ height:1, background:`linear-gradient(90deg, transparent, ${GOLD}, transparent)`, opacity:0.4, margin:"20px 0" }} />
-        <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, lineHeight:1.7, marginBottom:28, fontStyle:"italic" }}>Essa conquista representa sua consistência, sua intenção pedagógica e seu compromisso com uma experiência infantil mais organizada, segura e valiosa.</p>
+        <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, lineHeight:1.7, marginBottom:28, fontStyle:"italic" }}>Essa conquista representa sua decisão de começar, sua intenção pedagógica e seu compromisso com uma experiência infantil mais organizada, segura e valiosa.</p>
         <button style={{ ...s.btnG, boxShadow:"0 8px 20px rgba(184,150,62,0.4)", padding:"16px 40px" }} onClick={onClose}>Continuar minha jornada</button>
       </div>
     </div>

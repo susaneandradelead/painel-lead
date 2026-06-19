@@ -377,10 +377,33 @@ export default function App() {
   const sendToLEAD = async () => {
     if (!GOOGLE_SCRIPT_URL) { setSendStatus("no_url"); setShowConfirm(false); return; }
     const entry = { ...form, taxaRetencao: taxa, zone, dataEnvio: new Date().toISOString(), faixaAtual: progGeral.faixaAtual?.nome || "Sem faixa", mesesConsecutivos: progGeral.mesesCons };
-    try { await fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(entry) }); setSendStatus("success"); }
-    catch { setSendStatus("error"); }
-    setShowConfirm(false);
+    const sendToLEAD = async () => {
+  if (!GOOGLE_SCRIPT_URL) { setSendStatus("no_url"); setShowConfirm(false); return; }
+
+  const entry = {
+    ...form,
+    taxaRetencao: taxa,
+    zone,
+    dataEnvio: new Date().toISOString(),
+    faixaAtual: progGeral.faixaAtual?.nome || "Sem faixa",
+    mesesConsecutivos: progGeral.mesesCons
   };
+
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(entry),
+    });
+
+    setSendStatus("success");
+  }
+  catch {
+    setSendStatus("error");
+  }
+
+  setShowConfirm(false);
+};
 
   const proximo = progGeral.proximaFaixa;
   const proxPend = proximo ? (() => {

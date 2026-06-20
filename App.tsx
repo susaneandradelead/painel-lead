@@ -108,6 +108,8 @@ const FAIXAS = [
 ];
 
 const MESES_PARA_FAIXA = { branca: 1, azul: 2, roxa: 4, marrom: 8, preta: 12 };
+// Nota: o requisito "caso de evolução documentado" das faixas Marrom/Preta é controlado
+// pelo checklist manual (ids "casoEvolucao" / "casoSucesso"), não pelo campo de texto livre.
 
 const QUALITATIVE_OPTIONS = {
   participacaoPais: [
@@ -142,6 +144,64 @@ const COMPORTAMENTOS = [
   "Demonstra mais coragem","Chora menos na entrada","Aceita melhor os limites",
   "Interage melhor com outras crianças","Permanece mais tempo na proposta",
   "Demonstra mais autonomia","Responde melhor ao reforço positivo",
+];
+
+// ─── AGENTE LEAD DE COMUNICAÇÃO COM OS RESPONSÁVEIS ──────────────
+const CATEGORIAS_EVOLUCAO = [
+  {
+    id: "adaptacao", nome: "Adaptação emocional e segurança",
+    itens: ["Chorou menos na entrada","Entrou com mais segurança","Separou-se dos responsáveis com mais tranquilidade","Demonstrou mais confiança no ambiente","Participou sem precisar de incentivo constante","Demonstrou mais coragem","Sentiu-se mais pertencente ao grupo"],
+    leitura: "Essa evolução indica avanço na adaptação emocional, na construção de vínculo, no sentimento de pertencimento e na segurança da criança dentro do ambiente do tatame.",
+    msgModelo: (item) => `Hoje observamos uma evolução muito importante: ele(a) ${item.toLowerCase().includes("coragem") ? "demonstrou mais coragem para participar das propostas" : "apresentou avanço em " + item.toLowerCase()}. Esse progresso demonstra desenvolvimento na adaptação emocional, na construção de vínculo e na confiança dentro do ambiente do tatame.`,
+  },
+  {
+    id: "autorregulacao", nome: "Autorregulação emocional",
+    itens: ["Fez menos birra","Aceitou melhor os limites","Lidou melhor com frustrações","Aceitou melhor perder uma brincadeira","Recuperou-se mais rápido após contrariedades","Demonstrou mais autocontrole","Pediu ajuda com mais calma","Expressou emoções de forma mais adequada"],
+    leitura: "Essa evolução demonstra avanço na regulação emocional, na aceitação de limites e na capacidade de lidar com desafios e frustrações do cotidiano.",
+    msgModelo: (item) => `Hoje observamos que ele(a) lidou melhor com os limites da aula, apresentando avanço em "${item.toLowerCase()}". Essa evolução mostra progresso na regulação emocional e na capacidade de lidar com pequenas frustrações.`,
+  },
+  {
+    id: "convivencia", nome: "Convivência social",
+    itens: ["Respeitou melhor os amigos","Compartilhou melhor o espaço","Melhorou a interação com outras crianças","Esperou a vez com mais facilidade","Demonstrou mais cooperação","Participou melhor das atividades em grupo","Resolveu conflitos com mais tranquilidade","Demonstrou mais empatia","Incentivou colegas durante atividades"],
+    leitura: "Essa evolução aponta melhora na convivência social, na cooperação, no respeito aos limites do outro e na construção de relações saudáveis.",
+    msgModelo: (item) => `Hoje ele(a) demonstrou avanço em "${item.toLowerCase()}" durante as atividades. Esse é um progresso importante na convivência em grupo e na construção de respeito pelo espaço e pelo tempo do outro.`,
+  },
+  {
+    id: "disciplina", nome: "Comportamento e reforço positivo",
+    itens: ["Obedeceu melhor aos comandos","Respondeu melhor aos combinados","Respondeu melhor ao reforço positivo","Seguiu instruções com mais autonomia","Demonstrou mais responsabilidade","Respeitou melhor as regras da aula","Voltou mais rápido para a roda"],
+    leitura: "Essa evolução demonstra melhora na atenção, na escuta ativa, na compreensão de orientações e na resposta aos combinados da aula.",
+    msgModelo: (item) => `Hoje percebemos uma evolução na escuta e na resposta aos combinados da aula: "${item.toLowerCase()}". Isso mostra avanço na atenção, na organização e na compreensão da rotina do tatame.`,
+  },
+  {
+    id: "impulsos", nome: "Controle de impulsos",
+    itens: ["Mordeu menos","Bateu menos nos colegas","Interrompeu menos os colegas","Demonstrou mais paciência","Esperou orientações antes de agir","Controlou melhor reações impulsivas"],
+    leitura: "Essa evolução indica melhora no controle dos impulsos, na comunicação emocional e na construção de respostas mais adequadas dentro do grupo.",
+    msgModelo: (item) => `Hoje percebemos uma melhora importante no controle dos impulsos, com avanço em "${item.toLowerCase()}". Isso representa progresso na comunicação emocional e na convivência com os colegas.`,
+  },
+  {
+    id: "engajamento", nome: "Engajamento e participação",
+    itens: ["Participou melhor da aula","Conseguiu permanecer mais tempo na proposta","Demonstrou mais interesse pelas atividades","Conseguiu finalizar uma atividade","Manteve foco por mais tempo","Demonstrou mais iniciativa","Participou de desafios que antes evitava"],
+    leitura: "Essa evolução revela melhora no engajamento, na permanência na atividade, na motivação e na adaptação à rotina da aula.",
+    msgModelo: (item) => `Hoje observamos avanço em "${item.toLowerCase()}". Esse progresso mostra melhora na concentração, na motivação e na capacidade de se envolver com a proposta da aula.`,
+  },
+  {
+    id: "autonomia", nome: "Autonomia e independência",
+    itens: ["Demonstrou mais autonomia","Organizou melhor seus materiais","Iniciou atividades com menos ajuda","Tomou decisões com mais confiança","Demonstrou mais independência nas tarefas","Assumiu pequenas responsabilidades"],
+    leitura: "Essa evolução aponta crescimento na independência, na iniciativa, na responsabilidade e na confiança para agir com menos dependência do adulto.",
+    msgModelo: (item) => `Hoje ele(a) demonstrou avanço em "${item.toLowerCase()}". Esse progresso fortalece a autonomia, a iniciativa e a confiança para agir com mais independência.`,
+  },
+  {
+    id: "tecnico", nome: "Desenvolvimento técnico no Jiu Jitsu",
+    itens: ["Demonstrou melhor compreensão das posições","Executou movimentos com mais coordenação","Melhorou a postura durante os exercícios","Aplicou técnicas com mais confiança","Demonstrou evolução motora","Seguiu sequências técnicas com mais facilidade","Participou dos treinos técnicos com mais atenção"],
+    leitura: "Essa evolução demonstra progresso técnico, coordenação motora, compreensão dos movimentos e maior confiança na execução das atividades do Jiu Jitsu.",
+    msgModelo: (item) => `Hoje observamos uma evolução positiva na participação técnica das atividades: "${item.toLowerCase()}". Ele(a) demonstrou mais confiança na execução dos movimentos e maior compreensão das propostas trabalhadas em aula.`,
+  },
+  {
+    id: "cognitivo", nome: "Desenvolvimento cognitivo",
+    itens: ["Demonstrou mais atenção","Melhorou a capacidade de concentração","Compreendeu instruções com mais facilidade","Recordou combinados da aula","Demonstrou mais capacidade de observação","Resolveu desafios com mais autonomia"],
+    leitura: "Essa evolução aponta avanço na atenção, na compreensão de instruções, na memória de trabalho e na capacidade de aprendizagem.",
+    msgModelo: (item) => `Hoje percebemos avanço em "${item.toLowerCase()}". Esse progresso demonstra desenvolvimento na atenção, na compreensão de instruções e na capacidade de aprendizagem.`,
+  },
 ];
 
 const PRIORIDADES = [
@@ -235,8 +295,7 @@ function calcFaixaProgress(faixa, mesesCons, jornada, totalPaineis) {
       else if (mesesCons >= mNec) done++;
     } else {
       if (checks[item.id]) done++;
-    }
-  });
+    }  });
   const pct = Math.round((done / total) * 100);
   const desbloqueada = pct === 100;
   return { pct, done, total, desbloqueada };
@@ -360,7 +419,7 @@ export default function App() {
     alunosInicio:"",alunosFinal:"",novosAlunos:"",cancelamentos:"",
     participacaoPais:null,satisfacaoTurma:null,organizacaoAula:null,reforcoPosi:null,posicionamento:null,
     comportamentos:[],
-    criancaDestaque:"",evolucaoObservada:"",evolucaoComunicada:"",
+    criancaDestaque:"",evolucoesSelecionadas:[],evolucaoOutro:"",leituraLeadEvolucao:"",mensagemResponsaveis:"",
     prioridade:"",ajusteEscolhido:"",primeiraAcao:"",dataAplicacao:"",comoVouSaber:"",comoVouSaberOutro:"",
   });
 
@@ -405,7 +464,7 @@ export default function App() {
 
   const sendToLEAD = async () => {
     if (!GOOGLE_SCRIPT_URL) { setSendStatus("no_url"); setShowConfirm(false); return; }
-    const entry = { ...form, taxaRetencao: taxa, zone, dataEnvio: new Date().toISOString(), faixaAtual: progGeral.faixaAtual?.nome || "Sem faixa", mesesConsecutivos: progGeral.mesesCons, prioridade: form.prioridade, ajusteEscolhido: form.ajusteEscolhido, primeiraAcao: form.primeiraAcao, dataAplicacao: form.dataAplicacao, comoVouSaber: form.comoVouSaber === "Outro" ? form.comoVouSaberOutro : form.comoVouSaber };
+    const entry = { ...form, taxaRetencao: taxa, zone, dataEnvio: new Date().toISOString(), faixaAtual: progGeral.faixaAtual?.nome || "Sem faixa", mesesConsecutivos: progGeral.mesesCons, prioridade: form.prioridade, ajusteEscolhido: form.ajusteEscolhido, primeiraAcao: form.primeiraAcao, dataAplicacao: form.dataAplicacao, comoVouSaber: form.comoVouSaber === "Outro" ? form.comoVouSaberOutro : form.comoVouSaber, evolucoesSelecionadas: form.evolucoesSelecionadas.join(", "), categoriaEvolucao: CATEGORIAS_EVOLUCAO.filter(c => c.itens.some(i => form.evolucoesSelecionadas.includes(i))).map(c => c.nome).join(", "), evolucaoOutro: form.evolucaoOutro, leituraLeadEvolucao: form.leituraLeadEvolucao, mensagemResponsaveis: form.mensagemResponsaveis };
     try {
       await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
@@ -590,7 +649,71 @@ function StepQual({ form, upd }) {
   </div>;
 }
 
+// Gera a Leitura LEAD e a mensagem sugerida com base nas evoluções selecionadas
+function gerarLeituraEMensagem(selecionadas, outroTexto) {
+  if (!selecionadas.length && !outroTexto) return { leitura: "", mensagem: "" };
+
+  const categoriasEnvolvidas = [];
+  const itensEscolhidos = [];
+
+  selecionadas.forEach(item => {
+    const cat = CATEGORIAS_EVOLUCAO.find(c => c.itens.includes(item));
+    if (cat) {
+      if (!categoriasEnvolvidas.includes(cat)) categoriasEnvolvidas.push(cat);
+      itensEscolhidos.push(item);
+    }
+  });
+
+  let leitura = "";
+  if (categoriasEnvolvidas.length === 1) {
+    leitura = categoriasEnvolvidas[0].leitura;
+  } else if (categoriasEnvolvidas.length > 1) {
+    leitura = "Essa evolução combina avanços em diferentes áreas do desenvolvimento: " +
+      categoriasEnvolvidas.map(c => c.nome.toLowerCase()).join(", ") +
+      ". Juntos, esses ganhos demonstram progresso real na forma como a criança vivencia o tatame.";
+  }
+  if (outroTexto) {
+    leitura = leitura
+      ? leitura + " Também foi observado: " + outroTexto + "."
+      : "Essa evolução foi registrada de forma personalizada pelo professor: " + outroTexto + ".";
+  }
+
+  let mensagem = "";
+  if (itensEscolhidos.length === 1 && categoriasEnvolvidas.length === 1) {
+    mensagem = categoriasEnvolvidas[0].msgModelo(itensEscolhidos[0]);
+  } else if (itensEscolhidos.length > 1) {
+    const listaItens = itensEscolhidos.map(i => i.toLowerCase()).join(", ");
+    mensagem = `Hoje observamos uma evolução importante: ele(a) apresentou avanço em ${listaItens}. Esse progresso demonstra desenvolvimento real no tatame e seguimos acompanhando esse processo com carinho, intenção e constância.`;
+  }
+  if (outroTexto && !itensEscolhidos.length) {
+    mensagem = `Hoje observamos uma evolução importante: ${outroTexto}. Seguimos acompanhando esse processo com carinho, intenção e constância.`;
+  } else if (outroTexto && itensEscolhidos.length) {
+    mensagem = mensagem.replace(/Seguimos acompanhando.*$/, "") + ` Também notamos que ${outroTexto.toLowerCase()}. Seguimos acompanhando esse processo com carinho, intenção e constância.`;
+  } else if (mensagem && !mensagem.includes("Seguimos acompanhando")) {
+    mensagem += " Seguimos acompanhando esse processo com carinho, intenção e constância.";
+  }
+
+  return { leitura, mensagem };
+}
+
 function StepComp({ form, upd, toggle }) {
+  const toggleEvolucao = (item) => {
+    const atual = form.evolucoesSelecionadas.includes(item)
+      ? form.evolucoesSelecionadas.filter(i => i !== item)
+      : [...form.evolucoesSelecionadas, item];
+    upd("evolucoesSelecionadas", atual);
+    const { leitura, mensagem } = gerarLeituraEMensagem(atual, form.evolucaoOutro);
+    upd("leituraLeadEvolucao", leitura);
+    upd("mensagemResponsaveis", mensagem);
+  };
+
+  const updOutro = (txt) => {
+    upd("evolucaoOutro", txt);
+    const { leitura, mensagem } = gerarLeituraEMensagem(form.evolucoesSelecionadas, txt);
+    upd("leituraLeadEvolucao", leitura);
+    upd("mensagemResponsaveis", mensagem);
+  };
+
   return <div>
     <div style={s.quote}>"O professor LEAD não conduz o infantil apenas pela sensação. Ele observa, registra, interpreta e ajusta."</div>
     <div style={{ marginBottom:32 }}>
@@ -602,14 +725,52 @@ function StepComp({ form, upd, toggle }) {
         </div>
       ))}
     </div>
+
     <div style={{ marginBottom:32 }}>
       <div style={s.secTitle}>Destaque do mês</div>
       <div style={s.priv}>Para proteger a privacidade das crianças, orientamos que não sejam inseridos nomes completos de alunos. Utilize apenas iniciais, apelidos internos ou códigos de identificação.</div>
       <div style={{ marginTop:16 }}>
         <Field label="Criança que mais evoluiu (iniciais ou código)"><input style={s.inp} value={form.criancaDestaque} onChange={e=>upd("criancaDestaque",e.target.value)} placeholder="Ex: M.S. ou Aluno-03"/></Field>
-        <Field label="Evolução observada"><textarea style={s.ta} value={form.evolucaoObservada} onChange={e=>upd("evolucaoObservada",e.target.value)} placeholder="Descreva o que você observou..."/></Field>
-        <Field label="Evolução que pode ser comunicada aos pais"><textarea style={s.ta} value={form.evolucaoComunicada} onChange={e=>upd("evolucaoComunicada",e.target.value)} placeholder="Como você comunicaria essa evolução para a família?"/></Field>
       </div>
+    </div>
+
+    <div style={{ marginBottom:32 }}>
+      <div style={s.secTitle}>Agente LEAD de Comunicação com os Responsáveis</div>
+      <div style={s.quote}>"O professor LEAD não apenas observa evolução. Ele aprende a comunicar essa evolução com intenção."</div>
+
+      <div style={{ fontSize:11, fontFamily:"sans-serif", color:MUTED, letterSpacing:1, textTransform:"uppercase", marginBottom:12 }}>1. Evolução observada no mês</div>
+      <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginBottom:16 }}>Selecione uma ou mais palavras-chave que descrevem o que você observou:</p>
+
+      {CATEGORIAS_EVOLUCAO.map(cat => (
+        <div key={cat.id} style={{ marginBottom:20 }}>
+          <div style={{ fontSize:12, fontFamily:"sans-serif", color:GOLD, fontWeight:600, marginBottom:8 }}>{cat.nome}</div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
+            {cat.itens.map((item,i) => (
+              <div key={i} style={{ ...s.optCard(form.evolucoesSelecionadas.includes(item)), padding:"8px 12px", marginBottom:0 }} onClick={()=>toggleEvolucao(item)}>
+                <div style={{ fontSize:12, fontFamily:"sans-serif", color:form.evolucoesSelecionadas.includes(item)?GOLD:CHARCOAL }}>{item}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div style={{ marginBottom:20 }}>
+        <div style={{ fontSize:12, fontFamily:"sans-serif", color:GOLD, fontWeight:600, marginBottom:8 }}>Outro</div>
+        <textarea style={{ ...s.ta, minHeight:60 }} value={form.evolucaoOutro} onChange={e=>updOutro(e.target.value)} placeholder="Descreva livremente outra evolução observada..." />
+      </div>
+
+      {(form.leituraLeadEvolucao || form.mensagemResponsaveis) && (
+        <>
+          <div style={{ fontSize:11, fontFamily:"sans-serif", color:MUTED, letterSpacing:1, textTransform:"uppercase", marginBottom:12, marginTop:24 }}>2. Leitura LEAD da evolução</div>
+          <div style={s.cardG}>
+            <p style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.7, fontStyle:"italic", margin:0 }}>{form.leituraLeadEvolucao}</p>
+          </div>
+
+          <div style={{ fontSize:11, fontFamily:"sans-serif", color:MUTED, letterSpacing:1, textTransform:"uppercase", marginBottom:8, marginTop:24 }}>3. Mensagem que posso enviar aos responsáveis</div>
+          <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginBottom:12, lineHeight:1.6 }}>Use esta sugestão como base. Você pode copiar, adaptar e enviar aos responsáveis para comunicar evolução com mais clareza, intenção pedagógica e valor percebido.</p>
+          <textarea style={s.ta} value={form.mensagemResponsaveis} onChange={e=>upd("mensagemResponsaveis", e.target.value)} placeholder="Mensagem sugerida aparecerá aqui..." />
+        </>
+      )}
     </div>
   </div>;
 }
@@ -700,6 +861,14 @@ function ReportView({ data, progGeral }) {
     </div>
     <div style={{ textAlign:"center", marginBottom:20 }}><div style={s.zone(z)}>{z==="atenção"?"Zona de Atenção":z==="ajuste"?"Zona de Ajuste":"Zona de Crescimento"}</div></div>
     {data.comportamentos?.length>0&&<div style={s.card}><div style={s.secTitle}>Evoluções comportamentais</div>{data.comportamentos.map((c,i)=><div key={i} style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, padding:"5px 0", borderBottom:`0.5px solid ${BORDER}` }}>✓ {c}</div>)}</div>}
+    {(data.evolucoesSelecionadas?.length>0 || data.evolucaoOutro) && <div style={s.card}>
+      <div style={s.secTitle}>Agente LEAD de Comunicação</div>
+      {data.criancaDestaque && <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginBottom:8 }}><strong style={{ color:CHARCOAL }}>Destaque:</strong> {data.criancaDestaque}</p>}
+      {data.evolucoesSelecionadas?.length>0 && <p style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.7, marginBottom:8 }}><strong>Evoluções observadas:</strong> {data.evolucoesSelecionadas.join(", ")}</p>}
+      {data.evolucaoOutro && <p style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.7, marginBottom:8 }}><strong>Outro:</strong> {data.evolucaoOutro}</p>}
+      {data.leituraLeadEvolucao && <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, fontStyle:"italic", lineHeight:1.6, marginBottom:8 }}>{data.leituraLeadEvolucao}</p>}
+      {data.mensagemResponsaveis && <div style={{ background:GOLD_LIGHT, borderRadius:6, padding:"12px 14px", marginTop:8 }}><div style={{ fontSize:10, fontFamily:"sans-serif", color:GOLD, letterSpacing:1, textTransform:"uppercase", marginBottom:6 }}>Mensagem sugerida aos responsáveis</div><p style={{ fontSize:12, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.6, margin:0 }}>{data.mensagemResponsaveis}</p></div>}
+    </div>}
     {progGeral?.faixaAtual&&<div style={s.card}><div style={s.secTitle}>Jornada LEAD do Professor</div><div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:12 }}><FaixaIcon faixa={progGeral.faixaAtual} size={80}/><div><div style={{ fontSize:14, fontFamily:"sans-serif", color:CHARCOAL, fontWeight:500 }}>{progGeral.faixaAtual.nome}</div><div style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginTop:4 }}>{progGeral.faixaAtual.subtitulo}</div></div></div></div>}
     <div style={s.card}><div style={s.secTitle}>Próximo Ajuste LEAD</div><div style={{ fontSize:14, fontFamily:"sans-serif", color:GOLD, fontWeight:500, marginBottom:8 }}>{data.prioridade||"—"}</div>{data.ajusteEscolhido&&<p style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.7, marginBottom:8 }}><strong>Ajuste:</strong> {data.ajusteEscolhido}</p>}{data.primeiraAcao&&<p style={{ fontSize:13, fontFamily:"sans-serif", color:MUTED, lineHeight:1.7, marginBottom:8 }}><strong style={{ color:CHARCOAL }}>Primeira ação:</strong> {data.primeiraAcao}</p>}{data.dataAplicacao&&<p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginBottom:8 }}><strong style={{ color:CHARCOAL }}>Quando:</strong> {new Date(data.dataAplicacao+"T00:00:00").toLocaleDateString("pt-BR")}</p>}{(data.comoVouSaber)&&<p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED }}><strong style={{ color:CHARCOAL }}>Como vou saber se funcionou:</strong> {data.comoVouSaber==="Outro"?data.comoVouSaberOutro:data.comoVouSaber}</p>}</div>
     <div style={s.cardG}><div style={{ fontSize:11, fontFamily:"sans-serif", color:GOLD, letterSpacing:2, textTransform:"uppercase", marginBottom:10 }}>Mensagem estratégica · Equipe LEAD</div><p style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.8, fontStyle:"italic", margin:0 }}>{STRATEGIC_MSGS[z]}</p></div>

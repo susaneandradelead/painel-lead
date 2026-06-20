@@ -419,7 +419,7 @@ export default function App() {
     alunosInicio:"",alunosFinal:"",novosAlunos:"",cancelamentos:"",
     participacaoPais:null,satisfacaoTurma:null,organizacaoAula:null,reforcoPosi:null,posicionamento:null,
     comportamentos:[],
-    criancaDestaque:"",evolucoesSelecionadas:[],evolucaoOutro:"",leituraLeadEvolucao:"",mensagemResponsaveis:"",
+    criancaDestaque:"",evolucoesSelecionadas:[],evolucaoOutro:"",leituraLeadEvolucao:"",comandoAgenteLead:"",
     prioridade:"",ajusteEscolhido:"",primeiraAcao:"",dataAplicacao:"",comoVouSaber:"",comoVouSaberOutro:"",
   });
 
@@ -464,7 +464,7 @@ export default function App() {
 
   const sendToLEAD = async () => {
     if (!GOOGLE_SCRIPT_URL) { setSendStatus("no_url"); setShowConfirm(false); return; }
-    const entry = { ...form, taxaRetencao: taxa, zone, dataEnvio: new Date().toISOString(), faixaAtual: progGeral.faixaAtual?.nome || "Sem faixa", mesesConsecutivos: progGeral.mesesCons, prioridade: form.prioridade, ajusteEscolhido: form.ajusteEscolhido, primeiraAcao: form.primeiraAcao, dataAplicacao: form.dataAplicacao, comoVouSaber: form.comoVouSaber === "Outro" ? form.comoVouSaberOutro : form.comoVouSaber, evolucoesSelecionadas: form.evolucoesSelecionadas.join(", "), categoriaEvolucao: CATEGORIAS_EVOLUCAO.filter(c => c.itens.some(i => form.evolucoesSelecionadas.includes(i))).map(c => c.nome).join(", "), evolucaoOutro: form.evolucaoOutro, leituraLeadEvolucao: form.leituraLeadEvolucao, mensagemResponsaveis: form.mensagemResponsaveis };
+    const entry = { ...form, taxaRetencao: taxa, zone, dataEnvio: new Date().toISOString(), faixaAtual: progGeral.faixaAtual?.nome || "Sem faixa", mesesConsecutivos: progGeral.mesesCons, prioridade: form.prioridade, ajusteEscolhido: form.ajusteEscolhido, primeiraAcao: form.primeiraAcao, dataAplicacao: form.dataAplicacao, comoVouSaber: form.comoVouSaber === "Outro" ? form.comoVouSaberOutro : form.comoVouSaber, evolucoesSelecionadas: form.evolucoesSelecionadas.join(", "), categoriaEvolucao: CATEGORIAS_EVOLUCAO.filter(c => c.itens.some(i => form.evolucoesSelecionadas.includes(i))).map(c => c.nome).join(", "), evolucaoOutro: form.evolucaoOutro, leituraLeadEvolucao: form.leituraLeadEvolucao, comandoAgenteLead: form.comandoAgenteLead };
     try {
       await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
@@ -649,19 +649,14 @@ function StepQual({ form, upd }) {
   </div>;
 }
 
-// Gera a Leitura LEAD e a mensagem sugerida com base nas evoluções selecionadas
-function gerarLeituraEMensagem(selecionadas, outroTexto) {
-  if (!selecionadas.length && !outroTexto) return { leitura: "", mensagem: "" };
+// Gera a Leitura LEAD e o Comando para o Agente LEAD com base nas evoluções selecionadas
+function gerarLeituraEMensagem(selecionadas, outroTexto, criancaDestaque) {
+  if (!selecionadas.length && !outroTexto) return { leitura: "", comando: "" };
 
   const categoriasEnvolvidas = [];
-  const itensEscolhidos = [];
-
   selecionadas.forEach(item => {
     const cat = CATEGORIAS_EVOLUCAO.find(c => c.itens.includes(item));
-    if (cat) {
-      if (!categoriasEnvolvidas.includes(cat)) categoriasEnvolvidas.push(cat);
-      itensEscolhidos.push(item);
-    }
+    if (cat && !categoriasEnvolvidas.includes(cat)) categoriasEnvolvidas.push(cat);
   });
 
   let leitura = "";
@@ -678,40 +673,69 @@ function gerarLeituraEMensagem(selecionadas, outroTexto) {
       : "Essa evolução foi registrada de forma personalizada pelo professor: " + outroTexto + ".";
   }
 
-  let mensagem = "";
-  if (itensEscolhidos.length === 1 && categoriasEnvolvidas.length === 1) {
-    mensagem = categoriasEnvolvidas[0].msgModelo(itensEscolhidos[0]);
-  } else if (itensEscolhidos.length > 1) {
-    const listaItens = itensEscolhidos.map(i => i.toLowerCase()).join(", ");
-    mensagem = `Hoje observamos uma evolução importante: ele(a) apresentou avanço em ${listaItens}. Esse progresso demonstra desenvolvimento real no tatame e seguimos acompanhando esse processo com carinho, intenção e constância.`;
-  }
-  if (outroTexto && !itensEscolhidos.length) {
-    mensagem = `Hoje observamos uma evolução importante: ${outroTexto}. Seguimos acompanhando esse processo com carinho, intenção e constância.`;
-  } else if (outroTexto && itensEscolhidos.length) {
-    mensagem = mensagem.replace(/Seguimos acompanhando.*$/, "") + ` Também notamos que ${outroTexto.toLowerCase()}. Seguimos acompanhando esse processo com carinho, intenção e constância.`;
-  } else if (mensagem && !mensagem.includes("Seguimos acompanhando")) {
-    mensagem += " Seguimos acompanhando esse processo com carinho, intenção e constância.";
-  }
+  const evolucoesTexto = selecionadas.length ? selecionadas.join(", ") : "—";
+  const categoriasTexto = categoriasEnvolvidas.length ? categoriasEnvolvidas.map(c => c.nome).join(", ") : "—";
 
-  return { leitura, mensagem };
+  const comando = `Transforme a evolução abaixo em uma mensagem curta, acolhedora e profissional para os responsáveis, usando a linguagem do Método LEAD.
+
+A mensagem deve comunicar valor sem parecer relatório técnico demais. Ela deve mostrar que o Jiu Jitsu infantil contribui para o desenvolvimento motor, emocional, social, comportamental e cognitivo da criança.
+
+Dados observados:
+
+Criança:
+${criancaDestaque || "—"}
+
+Evoluções observadas:
+${evolucoesTexto}
+
+Categoria principal da evolução:
+${categoriasTexto}
+
+Leitura LEAD da evolução:
+${leitura || "—"}
+
+Outra observação do professor:
+${outroTexto || "—"}
+
+Escreva uma mensagem pronta para enviar no WhatsApp dos responsáveis, com tom acolhedor, seguro, profissional e de alto valor percebido.
+
+A mensagem deve ser objetiva, elegante, humana e fácil de entender pelos pais.`;
+
+  return { leitura, comando };
 }
 
 function StepComp({ form, upd, toggle }) {
+  const [copiedCmd, setCopiedCmd] = useState(false);
+
   const toggleEvolucao = (item) => {
     const atual = form.evolucoesSelecionadas.includes(item)
       ? form.evolucoesSelecionadas.filter(i => i !== item)
       : [...form.evolucoesSelecionadas, item];
     upd("evolucoesSelecionadas", atual);
-    const { leitura, mensagem } = gerarLeituraEMensagem(atual, form.evolucaoOutro);
+    const { leitura, comando } = gerarLeituraEMensagem(atual, form.evolucaoOutro, form.criancaDestaque);
     upd("leituraLeadEvolucao", leitura);
-    upd("mensagemResponsaveis", mensagem);
+    upd("comandoAgenteLead", comando);
   };
 
   const updOutro = (txt) => {
     upd("evolucaoOutro", txt);
-    const { leitura, mensagem } = gerarLeituraEMensagem(form.evolucoesSelecionadas, txt);
+    const { leitura, comando } = gerarLeituraEMensagem(form.evolucoesSelecionadas, txt, form.criancaDestaque);
     upd("leituraLeadEvolucao", leitura);
-    upd("mensagemResponsaveis", mensagem);
+    upd("comandoAgenteLead", comando);
+  };
+
+  const updCrianca = (txt) => {
+    upd("criancaDestaque", txt);
+    const { leitura, comando } = gerarLeituraEMensagem(form.evolucoesSelecionadas, form.evolucaoOutro, txt);
+    upd("leituraLeadEvolucao", leitura);
+    upd("comandoAgenteLead", comando);
+  };
+
+  const copiarComando = () => {
+    navigator.clipboard.writeText(form.comandoAgenteLead).then(() => {
+      setCopiedCmd(true);
+      setTimeout(() => setCopiedCmd(false), 2500);
+    });
   };
 
   return <div>
@@ -730,13 +754,13 @@ function StepComp({ form, upd, toggle }) {
       <div style={s.secTitle}>Destaque do mês</div>
       <div style={s.priv}>Para proteger a privacidade das crianças, orientamos que não sejam inseridos nomes completos de alunos. Utilize apenas iniciais, apelidos internos ou códigos de identificação.</div>
       <div style={{ marginTop:16 }}>
-        <Field label="Criança que mais evoluiu (iniciais ou código)"><input style={s.inp} value={form.criancaDestaque} onChange={e=>upd("criancaDestaque",e.target.value)} placeholder="Ex: M.S. ou Aluno-03"/></Field>
+        <Field label="Criança que mais evoluiu (iniciais ou código)"><input style={s.inp} value={form.criancaDestaque} onChange={e=>updCrianca(e.target.value)} placeholder="Ex: M.S. ou Aluno-03"/></Field>
       </div>
     </div>
 
     <div style={{ marginBottom:32 }}>
       <div style={s.secTitle}>Agente LEAD de Comunicação com os Responsáveis</div>
-      <div style={s.quote}>"O professor LEAD não apenas observa evolução. Ele aprende a comunicar essa evolução com intenção."</div>
+      <div style={s.quote}>"O Painel identifica a evolução. O Agente LEAD transforma essa evolução em uma comunicação profissional para os responsáveis."</div>
 
       <div style={{ fontSize:11, fontFamily:"sans-serif", color:MUTED, letterSpacing:1, textTransform:"uppercase", marginBottom:12 }}>1. Evolução observada no mês</div>
       <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginBottom:16 }}>Selecione uma ou mais palavras-chave que descrevem o que você observou:</p>
@@ -759,16 +783,24 @@ function StepComp({ form, upd, toggle }) {
         <textarea style={{ ...s.ta, minHeight:60 }} value={form.evolucaoOutro} onChange={e=>updOutro(e.target.value)} placeholder="Descreva livremente outra evolução observada..." />
       </div>
 
-      {(form.leituraLeadEvolucao || form.mensagemResponsaveis) && (
+      {(form.leituraLeadEvolucao || form.comandoAgenteLead) && (
         <>
           <div style={{ fontSize:11, fontFamily:"sans-serif", color:MUTED, letterSpacing:1, textTransform:"uppercase", marginBottom:12, marginTop:24 }}>2. Leitura LEAD da evolução</div>
           <div style={s.cardG}>
             <p style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.7, fontStyle:"italic", margin:0 }}>{form.leituraLeadEvolucao}</p>
           </div>
 
-          <div style={{ fontSize:11, fontFamily:"sans-serif", color:MUTED, letterSpacing:1, textTransform:"uppercase", marginBottom:8, marginTop:24 }}>3. Mensagem que posso enviar aos responsáveis</div>
-          <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginBottom:12, lineHeight:1.6 }}>Use esta sugestão como base. Você pode copiar, adaptar e enviar aos responsáveis para comunicar evolução com mais clareza, intenção pedagógica e valor percebido.</p>
-          <textarea style={s.ta} value={form.mensagemResponsaveis} onChange={e=>upd("mensagemResponsaveis", e.target.value)} placeholder="Mensagem sugerida aparecerá aqui..." />
+          <div style={{ fontSize:11, fontFamily:"sans-serif", color:MUTED, letterSpacing:1, textTransform:"uppercase", marginBottom:8, marginTop:24 }}>3. Comando para usar no Agente LEAD</div>
+          <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginBottom:12, lineHeight:1.6 }}>Copie o comando abaixo e cole no Agente LEAD para gerar uma mensagem personalizada, estratégica e pronta para enviar aos responsáveis.</p>
+          <textarea style={{ ...s.ta, minHeight:200, fontSize:12, fontFamily:"monospace" }} value={form.comandoAgenteLead} onChange={e=>upd("comandoAgenteLead", e.target.value)} placeholder="Comando aparecerá aqui..." />
+
+          <div style={{ marginTop:12 }}>
+            <button style={s.btnG} onClick={copiarComando}>{copiedCmd ? "Comando copiado! Agora cole no Agente LEAD." : "Copiar comando para o Agente LEAD"}</button>
+          </div>
+
+          <div style={{ ...s.priv, marginTop:20 }}>
+            Professores que possuem acesso ao Agente LEAD podem usar este comando para transformar a evolução observada em uma mensagem completa para os responsáveis.
+          </div>
         </>
       )}
     </div>
@@ -867,7 +899,7 @@ function ReportView({ data, progGeral }) {
       {data.evolucoesSelecionadas?.length>0 && <p style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.7, marginBottom:8 }}><strong>Evoluções observadas:</strong> {data.evolucoesSelecionadas.join(", ")}</p>}
       {data.evolucaoOutro && <p style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.7, marginBottom:8 }}><strong>Outro:</strong> {data.evolucaoOutro}</p>}
       {data.leituraLeadEvolucao && <p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, fontStyle:"italic", lineHeight:1.6, marginBottom:8 }}>{data.leituraLeadEvolucao}</p>}
-      {data.mensagemResponsaveis && <div style={{ background:GOLD_LIGHT, borderRadius:6, padding:"12px 14px", marginTop:8 }}><div style={{ fontSize:10, fontFamily:"sans-serif", color:GOLD, letterSpacing:1, textTransform:"uppercase", marginBottom:6 }}>Mensagem sugerida aos responsáveis</div><p style={{ fontSize:12, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.6, margin:0 }}>{data.mensagemResponsaveis}</p></div>}
+      {data.comandoAgenteLead && <div style={{ background:GOLD_LIGHT, borderRadius:6, padding:"12px 14px", marginTop:8 }}><div style={{ fontSize:10, fontFamily:"sans-serif", color:GOLD, letterSpacing:1, textTransform:"uppercase", marginBottom:6 }}>Comando para usar no Agente LEAD</div><p style={{ fontSize:11, fontFamily:"monospace", color:CHARCOAL, lineHeight:1.6, margin:0, whiteSpace:"pre-line" }}>{data.comandoAgenteLead}</p></div>}
     </div>}
     {progGeral?.faixaAtual&&<div style={s.card}><div style={s.secTitle}>Jornada LEAD do Professor</div><div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:12 }}><FaixaIcon faixa={progGeral.faixaAtual} size={80}/><div><div style={{ fontSize:14, fontFamily:"sans-serif", color:CHARCOAL, fontWeight:500 }}>{progGeral.faixaAtual.nome}</div><div style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginTop:4 }}>{progGeral.faixaAtual.subtitulo}</div></div></div></div>}
     <div style={s.card}><div style={s.secTitle}>Próximo Ajuste LEAD</div><div style={{ fontSize:14, fontFamily:"sans-serif", color:GOLD, fontWeight:500, marginBottom:8 }}>{data.prioridade||"—"}</div>{data.ajusteEscolhido&&<p style={{ fontSize:13, fontFamily:"sans-serif", color:CHARCOAL, lineHeight:1.7, marginBottom:8 }}><strong>Ajuste:</strong> {data.ajusteEscolhido}</p>}{data.primeiraAcao&&<p style={{ fontSize:13, fontFamily:"sans-serif", color:MUTED, lineHeight:1.7, marginBottom:8 }}><strong style={{ color:CHARCOAL }}>Primeira ação:</strong> {data.primeiraAcao}</p>}{data.dataAplicacao&&<p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED, marginBottom:8 }}><strong style={{ color:CHARCOAL }}>Quando:</strong> {new Date(data.dataAplicacao+"T00:00:00").toLocaleDateString("pt-BR")}</p>}{(data.comoVouSaber)&&<p style={{ fontSize:12, fontFamily:"sans-serif", color:MUTED }}><strong style={{ color:CHARCOAL }}>Como vou saber se funcionou:</strong> {data.comoVouSaber==="Outro"?data.comoVouSaberOutro:data.comoVouSaber}</p>}</div>

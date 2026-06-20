@@ -1,16 +1,28 @@
 {
-  "name": "Painel de Bordo LEAD",
-  "short_name": "LEAD Dashboard",
+  "name": "Painel de Bordo do Professor LEAD",
+  "short_name": "LEAD",
   "description": "Painel de Bordo do Professor LEAD",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#FAFAF8",
-  "theme_color": "#B8963E",
+  "background_color": "#F7F4ED",
+  "theme_color": "#F7F4ED",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
